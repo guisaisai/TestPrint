@@ -12,7 +12,7 @@ public class TestPrint {
     long start = 0;
     CountDownLatch countDownLatch = null;
 
-    boolean printResult = true;
+    boolean printResult = false;
     public void printResult(Object obj){
         if(printResult){
             System.out.print(",");
@@ -45,15 +45,14 @@ public class TestPrint {
     public void testUnLock() throws Exception {
         System.out.println();
         System.out.print("unlock:");
-        final int[] ii = {1};
+        AtomicInteger ii = new AtomicInteger(1);
         Thread a = new Thread("T1") {
             @Override
             public void run() {
-                while (ii[0] <= max) {
+                while (ii.get() <= max) {
                     if (isAPrint) {
-                        if (ii[0] % 2 != 0) {
-                            printResult(ii[0]);
-                            ii[0]++;
+                        if (ii.get() % 2 != 0) {
+                            printResult(ii.getAndAdd(1));
                             isAPrint = false;
                         }
                     }
@@ -66,11 +65,10 @@ public class TestPrint {
         Thread b = new Thread("T2") {
             @Override
             public void run() {
-                while (ii[0] <= max) {
+                while (ii.get() <= max) {
                     if (!isAPrint) {
-                        if (ii[0] % 2 == 0) {
-                            printResult(ii[0]);
-                            ii[0]++;
+                        if (ii.get() % 2 == 0) {
+                            printResult(ii.getAndAdd(1));
                             isAPrint = true;
                         }
                     }
